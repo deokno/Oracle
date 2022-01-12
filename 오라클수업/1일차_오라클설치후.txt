@@ -1,0 +1,418 @@
+Microsoft Windows [Version 10.0.19042.1415]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\덕노>sqlplus /nolog
+==> 오라클 명령프롬프트인 SQL > 을 띄워라는 말이다.
+
+SQL*Plus: Release 11.2.0.2.0 Production on 화 1월 4 12:03:19 2022
+
+Copyright (c) 1982, 2014, Oracle.  All rights reserved.
+
+
+SQL> show user
+==> 현재 오라클 서버에 연결된 사용자가 누구인지 보여라는 말이다. 
+USER is ""
+==> 현재 오라클 서버에 연결된 사용자가 없다는 말이다. 
+
+
+SQL>  connect system/cclass
+==> 오라클 사용자계정명은 system , 암호는 cclass 인 것으로 연결해라는 말이다. 
+Connected.
+==> Connected. 는 연결이 되었다는 말이다. 
+
+SQL> show user
+USER is "SYSTEM"
+==> 현재 오라클 서버에 연결된 사용자는 SYSTEM이다는 말이다.
+
+SQL> disconnect
+==> 현재 오라클 서버에 연결된 사용자를 오라클 서버에서 연결을 끊어라는 말이다.
+Disconnected from Oracle Database 11g Express Edition Release 11.2.0.2.0 - 64bit Production
+
+
+SQL> show user
+USER is ""
+==> 현재 오라클 서버에 연결된 사용자가 없다는 말이다. 
+
+
+SQL>  connect system/class
+ERROR:
+ORA-01017: invalid username/password; logon denied
+
+SQL> connect abcd/cclass
+ERROR:
+ORA-01017: invalid username/password; logon denied
+
+==> 아이디와 비밀번호를 다르게 입력한 경우 나오는 에러
+
+
+SQL> host
+==> 잠시 운영체제(Windows)의 명령프롬프트로 가겠다는 말이다. 
+Microsoft Windows [Version 10.0.19042.1415]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\덕노>
+
+C:\Users\덕노>exit
+==> 다시 오라클 명령프롬프트로 돌아가겠다는 말이다.
+SQL>
+
+
+SQL> cls
+==> cls는 오라클 명령어가 아니므로 오류 발생함.
+SP2-0042: unknown command "cls" - rest of line ignored.
+
+
+SQL> host cls
+==> 잠시 운영체제(Windows)의 명령프롬프트로 가서 운영체제의 명령어닌 cls(화면 지우기)를 해라는 말이다.
+
+ 
+SQL> host ipconfig/all
+
+Windows IP 구성
+
+   호스트 이름 . . . . . . . . : deokno
+   주 DNS 접미사 . . . . . . . :
+   노드 유형 . . . . . . . . . : 혼성
+   IP 라우팅 사용. . . . . . . : 아니요
+   WINS 프록시 사용. . . . . . : 아니요
+
+이더넷 어댑터 이더넷 2:
+
+   연결별 DNS 접미사. . . . :
+   설명. . . . . . . . . . . . : Microsoft KM-TEST 루프백 어댑터
+   물리적 주소 . . . . . . . . : 02-00-4C-4F-4F-50
+   DHCP 사용 . . . . . . . . . : 아니요
+   자동 구성 사용. . . . . . . : 예
+   링크-로컬 IPv6 주소 . . . . : fe80::c8:af64:9fc2:69dc%7(기본 설정)
+   IPv4 주소 . . . . . . . . . : 34.1.1.1(기본 설정)
+   서브넷 마스크 . . . . . . . : 255.255.255.255
+   기본 게이트웨이 . . . . . . :
+   DHCPv6 IAID . . . . . . . . : 637665356
+   DHCPv6 클라이언트 DUID. . . : 00-01-00-01-29-1B-A5-B4-84-1B-77-E3-BA-75
+   DNS 서버. . . . . . . . . . : fec0:0:0:ffff::1%1
+                                 fec0:0:0:ffff::2%1
+                                 fec0:0:0:ffff::3%1
+   Tcpip를 통한 NetBIOS. . . . : 사용
+
+무선 LAN 어댑터 로컬 영역 연결* 9:
+
+   미디어 상태 . . . . . . . . : 미디어 연결 끊김
+   연결별 DNS 접미사. . . . :
+   설명. . . . . . . . . . . . : Microsoft Wi-Fi Direct Virtual Adapter
+   물리적 주소 . . . . . . . . : 84-1B-77-E3-BA-76
+   DHCP 사용 . . . . . . . . . : 예
+   자동 구성 사용. . . . . . . : 예
+
+무선 LAN 어댑터 로컬 영역 연결* 10:
+
+   미디어 상태 . . . . . . . . : 미디어 연결 끊김
+   연결별 DNS 접미사. . . . :
+   설명. . . . . . . . . . . . : Microsoft Wi-Fi Direct Virtual Adapter #2
+   물리적 주소 . . . . . . . . : 86-1B-77-E3-BA-75
+   DHCP 사용 . . . . . . . . . : 예
+   자동 구성 사용. . . . . . . : 예
+
+무선 LAN 어댑터 Wi-Fi:
+
+   연결별 DNS 접미사. . . . :
+   설명. . . . . . . . . . . . : Intel(R) Wi-Fi 6 AX200 160MHz
+   물리적 주소 . . . . . . . . : 84-1B-77-E3-BA-75
+   DHCP 사용 . . . . . . . . . : 예
+   자동 구성 사용. . . . . . . : 예
+   링크-로컬 IPv6 주소 . . . . : fe80::e508:3a11:73ad:defb%16(기본 설정)
+   IPv4 주소 . . . . . . . . . : 192.168.10.130(기본 설정)
+   서브넷 마스크 . . . . . . . : 255.255.255.0
+   임대 시작 날짜. . . . . . . : 2022년 1월 4일 화요일 오전 11:27:30
+   임대 만료 날짜. . . . . . . : 2022년 1월 5일 수요일 오전 11:27:29
+   기본 게이트웨이 . . . . . . : 192.168.10.1
+   DHCP 서버 . . . . . . . . . : 192.168.10.1
+   DHCPv6 IAID . . . . . . . . : 243538807
+   DHCPv6 클라이언트 DUID. . . : 00-01-00-01-29-1B-A5-B4-84-1B-77-E3-BA-75
+   DNS 서버. . . . . . . . . . : 211.63.64.11
+                                 211.63.64.10
+   Tcpip를 통한 NetBIOS. . . . : 사용
+
+이더넷 어댑터 Bluetooth 네트워크 연결:
+
+   미디어 상태 . . . . . . . . : 미디어 연결 끊김
+   연결별 DNS 접미사. . . . :
+   설명. . . . . . . . . . . . : Bluetooth Device (Personal Area Network)
+   물리적 주소 . . . . . . . . : 84-1B-77-E3-BA-79
+   DHCP 사용 . . . . . . . . . : 예
+   자동 구성 사용. . . . . . . : 예
+
+
+
+SQL> show user
+USER is ""
+SQL> conn system/cclass  ==> connect를 conn 으로 줄일 수 있다.
+Connected.
+
+SQL> show user
+USER is "SYSTEM"
+
+SQL> disconn ==> disconnect 를 disconn으로 줄일 수 있다.
+Disconnected from Oracle Database 11g Express Edition Release 11.2.0.2.0 - 64bit Production
+
+SQL> show user
+USER is ""
+
+
+
+SQL> conn sys/cclass  ==> sys로 연결을 하려면 반드시 뒤에 as SYSDBA를 꼭 붙여야 한다.
+ERROR:
+ORA-28009: connection as SYS should be as SYSDBA or SYSOPER
+
+
+SQL> conn sys/cclass as sysdba
+Connected.
+SQL> show user
+USER is "SYS" ==>  SYS가 오라클 데이터베이스 관리자(정) 계정이다. 
+
+
+SQL> disconn
+Disconnected from Oracle Database 11g Express Edition Release 11.2.0.2.0 - 64bit Production
+
+SQL> conn system/cclass
+Connected.
+
+SQL> show user
+USER is "SYSTEM"
+
+SQL> shutdown immediate
+ORA-01031: insufficient privileges
+==> 오라클 데이터베이스 관리자(부) 계정인 system은 오라클서버를 중지 또는 시작(구동)을 할 수 있는 권한이 없다!!
+
+
+SQL> disconn
+Disconnected from Oracle Database 11g Express Edition Release 11.2.0.2.0 - 64bit Production
+
+SQL> conn sys/class as sysdba
+Connected.
+
+SQL> show user
+USER is "SYS"
+
+SQL> shutdown immediate ==> 오라클 서버를 중지시키는 명령어이다. 
+==> 오라클 데이터베이스 관리자(정) 계정인 sys는 오라클서버를 중지 또는 시작(구동)을 할 수 있는 권한이 있다!!
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+SQL> conn system/cclass
+ERROR:
+ORA-01034: ORACLE not available ==> 오라클 서버가 중지되었으므로 사용불가하다.
+ORA-27101: shared memory realm does not exist
+Process ID: 0
+Session ID: 0 Serial number: 0
+
+
+Warning: You are no longer connected to ORACLE.
+
+SQL> conn sys/cclass as sysdba
+Connected to an idle instance. 
+==> to an idle instance.는 현재 오라클 서버가 중지되어진 상태에서 sys로 연결되었다는 말이다.
+==> 오라클 서버가 중지되어진 상태이더라도 오로지 sys만은 연결이 가능하다.
+
+
+SQL> show user
+USER is "SYS"
+
+SQL> startup ==> 오라클 서버를 구동시켜주는 명령어인데 오로지 sys만 할 수 있다.
+ORACLE instance started.
+
+Total System Global Area 1068937216 bytes
+Fixed Size                  2260048 bytes
+Variable Size             616563632 bytes
+Database Buffers          444596224 bytes
+Redo Buffers                5517312 bytes
+Database mounted.
+Database opened.
+
+SQL> disconn
+Disconnected from Oracle Database 11g Express Edition Release 11.2.0.2.0 - 64bit Production
+
+SQL> conn system/cclass
+Connected.
+==> sys를 제외한 나머지 모든 오라클 사용자 계정은 반드시 오라클서버가 구동되어져 있어야만 연결하여 사용할 수 있다. 
+
+SQL> show user
+USER is "SYSTEM"
+
+
+SQL> select * from dba_users;  ==> sqlplus 를 사용하여 DB를 다루고자 할 때 아래와 같이 결과물을 보기에는
+ 가독성이 현저히 떨어지므로 안좋다.!!!
+그래서 우리는 ORACLE Database 서버를 설치한 후 ORACLE Database 서버를 다루는 툴인
+sqdeveloper 을 사용하여 쓰겠다. 
+
+
+USERNAME                                                        USER_ID
+------------------------------------------------------------ ----------
+PASSWORD
+------------------------------------------------------------
+ACCOUNT_STATUS                                                   LOCK_DAT
+---------------------------------------------------------------- --------
+EXPIRY_D DEFAULT_TABLESPACE
+-------- ------------------------------------------------------------
+TEMPORARY_TABLESPACE                                         CREATED
+------------------------------------------------------------ --------
+PROFILE
+------------------------------------------------------------
+INITIAL_RSRC_CONSUMER_GROUP
+------------------------------------------------------------
+EXTERNAL_NAME
+--------------------------------------------------------------------------------
+PASSWORD_VERSION ED AUTHENTICATION_T
+---------------- -- ----------------
+SYS                                                                   0
+
+USERNAME                                                        USER_ID
+------------------------------------------------------------ ----------
+PASSWORD
+------------------------------------------------------------
+ACCOUNT_STATUS                                                   LOCK_DAT
+---------------------------------------------------------------- --------
+EXPIRY_D DEFAULT_TABLESPACE
+-------- ------------------------------------------------------------
+TEMPORARY_TABLESPACE                                         CREATED
+------------------------------------------------------------ --------
+PROFILE
+------------------------------------------------------------
+INITIAL_RSRC_CONSUMER_GROUP
+------------------------------------------------------------
+EXTERNAL_NAME
+--------------------------------------------------------------------------------
+PASSWORD_VERSION ED AUTHENTICATION_T
+---------------- -- ----------------
+
+
+USERNAME                                                        USER_ID
+------------------------------------------------------------ ----------
+PASSWORD
+------------------------------------------------------------
+ACCOUNT_STATUS                                                   LOCK_DAT
+---------------------------------------------------------------- --------
+EXPIRY_D DEFAULT_TABLESPACE
+-------- ------------------------------------------------------------
+TEMPORARY_TABLESPACE                                         CREATED
+------------------------------------------------------------ --------
+PROFILE
+------------------------------------------------------------
+INITIAL_RSRC_CONSUMER_GROUP
+------------------------------------------------------------
+EXTERNAL_NAME
+--------------------------------------------------------------------------------
+PASSWORD_VERSION ED AUTHENTICATION_T
+---------------- -- ----------------
+OPEN
+
+USERNAME                                                        USER_ID
+------------------------------------------------------------ ----------
+PASSWORD
+------------------------------------------------------------
+ACCOUNT_STATUS                                                   LOCK_DAT
+---------------------------------------------------------------- --------
+EXPIRY_D DEFAULT_TABLESPACE
+-------- ------------------------------------------------------------
+TEMPORARY_TABLESPACE                                         CREATED
+------------------------------------------------------------ --------
+PROFILE
+------------------------------------------------------------
+INITIAL_RSRC_CONSUMER_GROUP
+------------------------------------------------------------
+EXTERNAL_NAME
+--------------------------------------------------------------------------------
+PASSWORD_VERSION ED AUTHENTICATION_T
+---------------- -- ----------------
+22/07/03 SYSTEM
+
+USERNAME                                                        USER_ID
+------------------------------------------------------------ ----------
+PASSWORD
+------------------------------------------------------------
+ACCOUNT_STATUS                                                   LOCK_DAT
+---------------------------------------------------------------- --------
+EXPIRY_D DEFAULT_TABLESPACE
+-------- ------------------------------------------------------------
+TEMPORARY_TABLESPACE                                         CREATED
+------------------------------------------------------------ --------
+PROFILE
+------------------------------------------------------------
+INITIAL_RSRC_CONSUMER_GROUP
+------------------------------------------------------------
+EXTERNAL_NAME
+--------------------------------------------------------------------------------
+PASSWORD_VERSION ED AUTHENTICATION_T
+---------------- -- ----------------
+TEMP                                                         14/05/29
+
+USERNAME                                                        USER_ID
+------------------------------------------------------------ ----------
+PASSWORD
+------------------------------------------------------------
+ACCOUNT_STATUS                                                   LOCK_DAT
+---------------------------------------------------------------- --------
+EXPIRY_D DEFAULT_TABLESPACE
+-------- ------------------------------------------------------------
+TEMPORARY_TABLESPACE                                         CREATED
+------------------------------------------------------------ --------
+PROFILE
+------------------------------------------------------------
+INITIAL_RSRC_CONSUMER_GROUP
+------------------------------------------------------------
+EXTERNAL_NAME
+--------------------------------------------------------------------------------
+PASSWORD_VERSION ED AUTHENTICATION_T
+---------------- -- ----------------
+DEFAULT
+
+USERNAME                                                        USER_ID
+------------------------------------------------------------ ----------
+PASSWORD
+------------------------------------------------------------
+ACCOUNT_STATUS                                                   LOCK_DAT
+---------------------------------------------------------------- --------
+EXPIRY_D DEFAULT_TABLESPACE
+-------- ------------------------------------------------------------
+TEMPORARY_TABLESPACE                                         CREATED
+------------------------------------------------------------ --------
+PROFILE
+------------------------------------------------------------
+INITIAL_RSRC_CONSUMER_GROUP
+------------------------------------------------------------
+EXTERNAL_NAME
+--------------------------------------------------------------------------------
+PASSWORD_VERSION ED AUTHENTICATION_T
+---------------- -- ----------------
+SYS_GROUP
+
+USERNAME                                                        USER_ID
+------------------------------------------------------------ ----------
+PASSWORD
+------------------------------------------------------------
+ACCOUNT_STATUS                                                   LOCK_DAT
+---------------------------------------------------------------- --------
+EXPIRY_D DEFAULT_TABLESPACE
+-------- ------------------------------------------------------------
+TEMPORARY_TABLESPACE                                         CREATED
+------------------------------------------------------------ --------
+PROFILE
+------------------------------------------------------------
+INITIAL_RSRC_CONSUMER_GROUP
+------------------------------------------------------------
+EXTERNAL_NAME
+--------------------------------------------------------------------------------
+PASSWORD_VERSION ED AUTHENTICATION_T
+---------------- -- ----------------
+
+..............................................
+
+
+
+
+
+
+
+
+
+
