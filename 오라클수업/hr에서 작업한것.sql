@@ -2970,7 +2970,10 @@ From REGIONS; -- 대륙정보를 알려주는 테이블
           ,panmaesu    number
           );
   -- Table TBL_PANMAE이(가) 생성되었습니다.
-  
+    
+    delete from tbl_panmae
+    
+    
      insert into tbl_panmae(panmaedate, jepumname, panmaesu)
      values( add_months(sysdate,-2), '새우깡', 10);
     
@@ -4892,3 +4895,911 @@ From REGIONS; -- 대륙정보를 알려주는 테이블
    
    
    
+   
+   ------ ====== **** SET Operator(SET 연산자, 집합연산자) **** ======= ------
+    /*
+        -- 종류 --
+        1. UNION 
+        2. UNION ALL
+        3. INTERSECT
+        4. MINUS
+        
+        -- 면접시 JOIN 과 UNION 의 차이점에 대해서 말해 보세요~~~ !! --
+        
+    ==>  UNION 은 테이블(뷰)과 테이블(뷰)을 합쳐서 보여주는 것으로써,
+         이것은 행(ROW)과 행(ROW)을 합친 결과를 보여주는 것이다.
+
+    A = { a, x, b, e, g }
+          -     -
+    B = { c, d, a, b, y, k, m}    
+                -  -    
+    A ∪ B = {a, b, c, d, e, g, k, m, x, y}  ==> UNION               
+                                             {a, b, c, d, e, g, k, m, x, y} -- 중복된 것을 없애주고 오름차순으로 정렬
+
+                                             ==> UNION ALL 
+                                             {a, x, b, e, g, c, d, a, b, y, k, m} -- 
+
+    A ∩ B = {a,b}  ==> INTERSECT
+                       {a,b}
+
+    A - B = {x,e,g} ==> MINUS 
+                        {x,e,g}
+
+    B - A = {c,d,y,k,m} ==> MINUS 
+                           {c,d,y,k,m}
+ */
+   
+   select *
+   from tbl_panmae;
+   
+   -- tbl_panmae 테이블에서 2달 전에 해당하는 월(현재가 2022년 1월 이므로 2021년 11월)에 판매되어진 정보만 추출해서
+   -- tbl_panmae_202111 이라는 테이블로 생성하세요.
+   delete from tbl_panmae_202111
+   drop table tbl_panmae_202111;
+   
+   
+   create table tbl_panmae_202111
+   as
+   select *
+   from tbl_panmae
+   where to_char(panmaedate, 'yyyy-mm') = to_char(add_months(sysdate, -2),'yyyy-mm');
+   -- Table TBL_PANMAE_202111이(가) 생성되었습니다.
+   select *
+   from tbl_panmae_202111;
+   
+   -- tbl_panmae 테이블에서 1달 전에 해당하는 월(현재가 2022년 1월 이므로 2021년 12월)에 판매되어진 정보만 추출해서
+   -- tbl_panmae_202112 이라는 테이블로 생성하세요.
+   delete from tbl_panmae_202112
+   drop table tbl_panmae_202112;
+   
+   create table tbl_panmae_202112
+   as
+   select *
+   from tbl_panmae
+   where to_char(panmaedate, 'yyyy-mm') = to_char(add_months(sysdate, -1),'yyyy-mm');
+   -- Table TBL_PANMAE_202112이(가) 생성되었습니다.
+   select *
+   from tbl_panmae_202112;
+   
+   -- tbl_panmae 테이블에서 이번달에 해당하는 월 (현재가 2022년 1월)에 판매되어진 정보만 남겨두고
+   -- 나머지는 모두 삭제하세요. 
+   
+   delete from tbl_panmae
+   where to_char(panmaedate, 'yyyy-mm') < to_char(sysdate,'yyyy-mm');
+   
+   commit;
+   
+   --- *** 최근 3개월간 판매되어진 정보를 가지고 제품별 판매량의 합계를 추출하세요 *** ---
+   
+   
+   select *
+   from tbl_panmae_202111; -- 2달전
+   
+   select *
+   from tbl_panmae_202112; -- 1달전
+   
+   select *
+   from tbl_panmae -- 이번달
+   
+   
+   
+   select *
+   from tbl_panmae_202111 -- 2달전
+   union
+   select *
+   from tbl_panmae_202112 -- 1달전
+   union
+   select *
+   from tbl_panmae; -- 이번달
+   
+   
+   select *
+   from tbl_panmae -- 이번달
+   union
+   select *
+   from tbl_panmae_202111 -- 2달전
+   union
+   select *
+   from tbl_panmae_202112; -- 1달전
+   -- union을 하면 항상 첫번째 컬럼(지금은 panmaedate)을 기준으로 오름차순 정렬되어 나온다. 
+   -- 그래서 2021년 11월 데이터 부터 먼저 나온다. 
+   
+   
+   select *
+   from tbl_panmae -- 이번달
+   union all
+   select *
+   from tbl_panmae_202111 -- 2달전
+   union all
+   select *
+   from tbl_panmae_202112; -- 1달전
+   -- union all을 하면 정렬 없이 그냥 순서대로 행을 붙여서 보여줄 뿐이다. 
+   -- 그래서 맨처음이 tbl_panmae 테이블이고, 그 다음이 tbl_panmae_202111 테이블이고,
+   -- 마지막이 tbl_panmae_202112 테이블이므로 순서대로 보여질 뿐이다. 
+   
+   
+   
+   select jepumname as 제품명
+        , sum(panmaesu) as 판매합계
+   from
+   (
+   select *
+   from tbl_panmae_202111 -- 2달전
+   union
+   select *
+   from tbl_panmae_202112 -- 1달전
+   union
+   select *
+   from tbl_panmae
+   ) V
+   group by jepumname
+   order by 2 desc;
+   
+   -- 또는
+   with 
+   V as
+   (
+    select *
+   from tbl_panmae_202111 -- 2달전
+   union
+   select *
+   from tbl_panmae_202112 -- 1달전
+   union
+   select *
+   from tbl_panmae
+   )
+   select jepumname as 제품명
+        , sum(panmaesu) as 판매합계
+   from V
+   group by jepumname
+   order by 2 desc;
+   
+   
+   ---- *** [퀴즈] 최근 3개월간 판매되어진 정보를 가지고 
+     --             아래와 같이 제품명, 판매년월, 판매량의합계, 백분율(%) 을 추출하세요 *** ----  
+     
+     ------------------------------------------------
+      제품명     판매년월     판매량의합계    백분율(%)
+     ------------------------------------------------
+      감자깡     2021-11       20            8.2
+      감자깡     2021-12       15            6.2
+      감자깡     2022-01       15            6.2
+      감자깡                   50           20.6
+      새우깡     2021-11       38           15.6
+      새우깡     2021-12        8            3.3
+      새우깡     2022-01       30           12.3
+      새우깡                   76           31.3
+      .....     .......       ...          ....
+      전체                    243          100.0
+     ------------------------------------------------  
+     --- !!!!!!!!! 중요 조심해야 합니다. !!!!!!!!!!_----
+     -- 최근 3개월간 판매되어진 판매량의 합계는 ?
+     -- 틀린 것 
+        
+        select sum(panmaesu) -- 98 오류!
+        from
+       (
+           select panmaesu
+           from tbl_panmae_202111 -- 2달전
+           union
+           select panmaesu
+           from tbl_panmae_202112 -- 1달전
+           union
+           select panmaesu
+           from tbl_panmae
+       ) V
+        
+     -- 올바른 것 
+     
+     select sum(panmaesu) -- 243 
+        from
+       (
+           select panmaesu
+           from tbl_panmae_202111 -- 2달전
+           union all
+           select panmaesu
+           from tbl_panmae_202112 -- 1달전
+           union all
+           select panmaesu
+           from tbl_panmae
+       ) V
+       
+       
+   select decode( grouping(jepumname), 0, jepumname, '전체' ) as 제품명
+   -- 또는 , NVL(jepumname , '전체') as 제품명
+         
+          , decode(grouping (to_char(panmaedate, 'yyyy-mm')), 0, (to_char(panmaedate, 'yyyy-mm')), ' ') as 판매년월
+   -- 또는 , NVL( to_char(panmaedate, 'yyyy-mm'), ' ') as 판매년월
+         
+          , sum(panmaesu) as 판매량의합계
+          , round(sum(panmaesu)/(select sum(panmaesu) -- 243 
+            from
+               (
+                   select panmaesu
+                   from tbl_panmae_202111 -- 2달전
+                   union all
+                   select panmaesu
+                   from tbl_panmae_202112 -- 1달전
+                   union all
+                   select panmaesu
+                   from tbl_panmae
+               ) V2
+       )*100, 1) as "백분율(%)"
+   from
+   (
+   select *
+   from tbl_panmae_202111 -- 2달전
+   union
+   select *
+   from tbl_panmae_202112 -- 1달전
+   union
+   select *
+   from tbl_panmae
+   ) V
+   group by grouping sets((jepumname, to_char(panmaedate, 'yyyy-mm')), jepumname, ())
+   -- 또는
+   -- group by rollup((jepumname, to_char(panmaedate, 'yyyy-mm')), jepumname, ())
+   
+  
+   
+   ---- with 절
+   with
+   V as
+   (
+       select *
+       from tbl_panmae_202111 -- 2달전
+       union 
+       select *
+       from tbl_panmae_202112 -- 1달전
+       union 
+       select *
+       from tbl_panmae
+   )
+   ,
+   V_2 as
+   (
+       select panmaesu
+       from tbl_panmae_202111 -- 2달전
+       union all
+       select panmaesu
+       from tbl_panmae_202112 -- 1달전
+       union all
+       select panmaesu
+       from tbl_panmae
+   )
+   select decode( grouping(jepumname), 0, jepumname, '전체' ) as 제품명
+   -- 또는 , NVL(jepumname , '전체') as 제품명
+          
+          , decode(grouping (to_char(panmaedate, 'yyyy-mm')), 0, (to_char(panmaedate, 'yyyy-mm')), ' ') as 판매년월
+   -- 또는 , NVL( to_char(panmaedate, 'yyyy-mm'), ' ') as 판매년월
+        
+          , sum(panmaesu) as 판매량의합계
+          , round(sum(panmaesu)/(select sum(panmaesu) from V_2)*100, 1) as "백분율(%)"
+   from V
+   --group by grouping sets((jepumname, to_char(panmaedate, 'yyyy-mm')), jepumname, ())
+   -- 또는
+   group by rollup(jepumname, to_char(panmaedate, 'yyyy-mm'));
+   
+   
+   
+       -------------------------------------------------------------------
+     
+     
+    
+    ---- ======= **** INTERSECT(교집합) **** ======== -------
+    
+    insert into tbl_panmae_202111(panmaedate, jepumname, panmaesu)
+    values( to_date('2021-09-01', 'yyyy-mm-dd'), '쵸코파이', 10);
+
+    insert into tbl_panmae_202111(panmaedate, jepumname, panmaesu)
+    values( to_date('2021-09-01 10:00:00', 'yyyy-mm-dd hh24:mi:ss'), '쵸코파이', 10);
+        
+    insert into tbl_panmae_202112(panmaedate, jepumname, panmaesu)
+    values( to_date('2021-09-01', 'yyyy-mm-dd'), '쵸코파이', 10);
+    
+    insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+    values( to_date('2021-09-01', 'yyyy-mm-dd'), '쵸코파이', 10);
+    
+    -----------------------------------------------------------------------
+    
+    insert into tbl_panmae_202111(panmaedate, jepumname, panmaesu)
+    values( to_date('2021-09-01 10:00:00', 'yyyy-mm-dd hh24:mi:ss'), '쵸코파이', 2);
+    
+    insert into tbl_panmae_202112(panmaedate, jepumname, panmaesu)
+    values( to_date('2021-09-01 14:00:00', 'yyyy-mm-dd hh24:mi:ss'), '쵸코파이', 2);
+    
+    insert into tbl_panmae(panmaedate, jepumname, panmaesu)
+    values( to_date('2021-09-01 16:00:00', 'yyyy-mm-dd hh24:mi:ss'), '쵸코파이', 2);
+    
+    commit;
+    
+    
+       select *
+       from tbl_panmae_202111 -- 2달전
+       intersect
+       select *
+       from tbl_panmae_202112 -- 1달전
+       intersect
+       select *
+       from tbl_panmae
+       -- 21/09/01	쵸코파이	10
+       
+       delete from tbl_panmae_202111
+       where to_char(panmaedate, 'yyyy-mm-dd hh24:mi:ss') || jepumname || panmaesu 
+       in(
+           select to_char(panmaedate, 'yyyy-mm-dd hh24:mi:ss') || jepumname || panmaesu
+           from tbl_panmae_202111 -- 2달전
+           intersect
+           select to_char(panmaedate, 'yyyy-mm-dd hh24:mi:ss') || jepumname || panmaesu
+           from tbl_panmae_202112 -- 1달전
+           intersect
+           select to_char(panmaedate, 'yyyy-mm-dd hh24:mi:ss') || jepumname || panmaesu
+           from tbl_panmae
+          );
+          -- 1 행 이(가) 삭제되었습니다.
+          
+          
+      delete from tbl_panmae_202112
+       where to_char(panmaedate, 'yyyy-mm-dd hh24:mi:ss') || jepumname || panmaesu 
+       in(
+           select to_char(panmaedate, 'yyyy-mm-dd hh24:mi:ss') || jepumname || panmaesu
+           from tbl_panmae_202112 -- 1달전
+           intersect
+           select to_char(panmaedate, 'yyyy-mm-dd hh24:mi:ss') || jepumname || panmaesu
+           from tbl_panmae
+          );    
+
+      commit; 
+      
+      
+      ----- ===== **** MINUS(차집합) **** ===== -----
+      
+      select * from tab; 
+      
+      select *
+      from TBL_EMPLOYEES_BACKUP_220111;
+  
+      select *  
+      from employees
+      where employee_id IN(173, 185, 195);
+      
+      select *  
+      from TBL_EMPLOYEES_BACKUP_220111
+      where employee_id IN(173, 185, 195);
+      
+      delete from employees
+      where employee_id IN(173, 185, 195);
+      -- 3개 행 이(가) 삭제되었습니다.
+      
+      commit;
+      -- 커밋 완료.
+      
+      -- *** 개발자가 실수로 employees 테이블에 있던 사원들을 삭제(delete)했다. 그런데 누구를 삭제했는지 모른다.!!!!
+  --     백업받은 TBL_EMPLOYEES_BACKUP 테이블을 이용하여 삭제된 사원들을 다시 복구하도록 하겠다. *** ---
+  
+  
+      select *  
+      from TBL_EMPLOYEES_BACKUP_220111
+      minus
+      select *  
+      from employees;
+      
+      select *  
+      from employees
+      where employee_id IN(173, 185, 195);
+      -- 없음
+      
+      insert into employees
+      select *  
+      from TBL_EMPLOYEES_BACKUP_220111
+      minus
+      select *  
+      from employees;
+      -- 3개 행 이(가) 삽입되었습니다.
+      
+      commit;
+      
+      select *  
+      from employees
+      where employee_id IN(173, 185, 195);
+      -- 있음. 즉, 복구완료함.
+      
+      
+      
+      
+  ----------- ====== **** Pseudo(의사, 유사, 모조) Column **** ====== -----------
+  ------ Pseudo(의사) Column 은 rowid 와 rownum 이 있다.
+  
+  /*
+    1. rowid
+       rowid 는 오라클이 내부적으로 사용하기 위해 만든 id 값으로써 행에 대한 id값 인데
+       오라클 전체내에서 고유한 값을 가진다.
+  */
+     create table tbl_heowon
+     (userid     varchar2(20),
+      name       varchar2(20),
+      address    varchar2(100)
+     );
+    
+    insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+    insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+    insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+    
+    insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+    insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+    insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+        
+    insert into tbl_heowon(userid, name, address) values('leess','이순신','서울');
+    insert into tbl_heowon(userid, name, address) values('eomjh','엄정화','인천');
+    insert into tbl_heowon(userid, name, address) values('kangkc','강감찬','수원');
+        
+    commit;
+    
+    select *
+    from tbl_heowon;    
+      
+    select userid, name, address, rowid
+    from tbl_heowon; 
+    
+    select userid, name, address, rowid
+    from tbl_heowon
+    where rowid in('AAAE8jAAEAAAAG2AAA', 'AAAE8jAAEAAAAG2AAB', 'AAAE8jAAEAAAAG2AAC');
+      
+    delete from tbl_heowon
+    where rowid  > 'AAAE8jAAEAAAAG2AAC'
+    
+    commit;
+
+
+
+
+      
+  /*
+       2. rownum (!!!! 게시판 등 웹에서 아주 많이 사용됩니다. !!!!)
+   */    
+    
+    select boardno as 글번호
+         , subject as 글제목
+         , userid as 글쓴이
+         , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as 작성일자
+    from tbl_board                  
+    order by boardno desc;
+    
+    -----------------------------------------------------------------------------
+    번호  글번호  글제목                               글쓴이   작성일자
+    -----------------------------------------------------------------------------
+    1       5	오늘도 좋은 하루되세요	                hongkd	2022-01-07 11:45:47
+    2       4	기쁘고 감사함이 넘치는 좋은 하루되세요 	leess	2022-01-07 11:45:47
+    3       3	건강하세요	                        youks	2022-01-07 11:45:47
+    4       2	반갑습니다	                        eomjh	2022-01-07 11:45:47
+    5       1	안녕하세요	                        leess	2022-01-07 11:45:47
+   -------------------------------------------------------------------------------
+               1  2  3  ==> 페이지바             
+    
+    select rownum  -- rownum(행번호) 은 기본적으로 insert 되어진 순서대로 나온다. 
+         , boardno as 글번호
+         , subject as 글제목
+         , userid as 글쓴이
+         , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as 작성일자
+    from tbl_board ;
+    
+    
+    select rownum
+         , boardno 
+         , subject 
+         , userid 
+         , registerday
+    from 
+    (
+    select boardno 
+         , subject 
+         , userid 
+         , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+    from tbl_board                  
+    order by boardno desc
+    ) V
+    
+    -- 또는 
+    
+    with V as
+    (
+        select boardno 
+             , subject 
+             , userid 
+             , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+        from tbl_board                  
+        order by boardno desc
+    )
+    select rownum
+         , boardno 
+         , subject 
+         , userid 
+         , registerday
+    from V
+    
+    -- 또는 rownum을 사용하지 않고 row_number() 함수를 사용해서 나타낼 수 있다. 
+    
+        select row_number() over(order by boardno desc)                                         
+             , boardno 
+             , subject 
+             , userid 
+             , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+        from tbl_board;                  
+    
+    
+    /*
+        한 페이지당 2개씩 보여주고자 한다.
+        
+        1 페이지 ==>  rownum : 1 ~ 2   boardno : 5 ~ 4      
+        2 페이지 ==>  rownum : 3 ~ 4   boardno : 3 ~ 2     
+        3 페이지 ==>  rownum : 5 ~ 6   boardno : 1          
+    */
+    
+    -- [ 틀린 SQL 문] -- 
+    --  1 페이지 ==>  rownum : 1 ~ 2  /  boardno : 5 ~ 4
+    
+    select rownum
+         , boardno 
+         , subject 
+         , userid 
+         , registerday
+    from 
+    (
+    select boardno 
+         , subject 
+         , userid 
+         , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+    from tbl_board                  
+    order by boardno desc
+    ) V
+    where rownum between 1 and 2;
+    
+    --  2 페이지 ==>  rownum : 3 ~ 4  /  boardno : 3 ~ 2
+    
+    select rownum
+         , boardno 
+         , subject 
+         , userid 
+         , registerday
+    from 
+    (
+    select boardno 
+         , subject 
+         , userid 
+         , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+    from tbl_board                  
+    order by boardno desc
+    ) V
+    where rownum between 3 and 4;
+    -- rownum 은 where절에 바로 쓸 수가 없다. 
+    -- 그래서 rownum 을 가지는 컬럼의 별칭을 만든 후에 inline view를 사용해야만 한다. 
+    
+    
+    
+    
+    
+    -- [ 올바른 SQL 문] -- 
+    
+    --  1 페이지 ==>  rownum : 1 ~ 2  /  boardno : 5 ~ 4
+            
+        /*
+            >>> rownum : 1~ 2를 구하는 공식 <<<
+            (currentShowPageNo * sizePerPage) - (sizePerPage - 1);
+                             1 * 2 - ( 2 - 1 ) ==> 1   
+                sizePerPage 가 10일 서울교대 게시판
+                       1 * 10 - ( 10 - 1 ) ==> 1
+                    
+                    
+            (currentShowPageNo * sizePerPage);
+                             1 * 2 ==> 2
+                sizePerPage 가 10일 서울교대 게시판
+                           1 * 10  ==> 10           
+                                        
+        */
+            
+            
+      select boardno, subject, userid, registerday   
+      from  
+      (
+        select rownum AS RNO, boardno, subject, userid, registerday
+        from 
+        (
+        select boardno 
+             , subject 
+             , userid 
+             , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+        from tbl_board                  
+        order by boardno desc
+        ) V
+     ) T
+     where T.RNO between 1 and 2; -- 1페이지  
+ 
+ 
+ 
+    --  2 페이지 ==>  rownum : 3 ~ 4  /  boardno : 3 ~ 2
+   /*
+            >>> rownum : 3~ 4를 구하는 공식 <<<
+            (currentShowPageNo * sizePerPage) - (sizePerPage - 1);
+                             2 * 2 - ( 2 - 1 ) ==> 3   
+                sizePerPage 가 10일 서울교대 게시판
+                       2 * 10 - ( 10 - 1 ) ==> 11 
+                    
+                    
+            (currentShowPageNo * sizePerPage);
+                             2 * 2 ==> 4
+                sizePerPage 가 10일 서울교대 게시판
+                           2 * 10  ==> 20           
+                                        
+        */ 
+    select boardno, subject, userid, registerday   
+      from  
+      (
+        select rownum AS RNO, boardno, subject, userid, registerday
+        from 
+        (
+        select boardno 
+             , subject 
+             , userid 
+             , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+        from tbl_board                  
+        order by boardno desc
+        ) V
+     ) T
+     where T.RNO between 3 and 4; -- 2페이지
+    
+    
+    --  3 페이지 ==>  rownum : 5 ~ 6  /  boardno : 1
+    /*
+            >>> rownum : 5~ 6를 구하는 공식 <<<
+            (currentShowPageNo * sizePerPage) - (sizePerPage - 1);
+                             3 * 2 - ( 2 - 1 ) ==> 5   
+                sizePerPage 가 10일 서울교대 게시판
+                       3 * 10 - ( 10 - 1 ) ==> 21 
+                    
+                    
+            (currentShowPageNo * sizePerPage);
+                             3 * 2 ==> 6
+                sizePerPage 가 10일 서울교대 게시판
+                           3 * 10  ==> 30           
+                                        
+        */ 
+    select boardno, subject, userid, registerday   
+      from  
+      (
+        select rownum AS RNO, boardno, subject, userid, registerday
+        from 
+        (
+        select boardno 
+             , subject 
+             , userid 
+             , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+        from tbl_board                  
+        order by boardno desc
+        ) V
+     ) T
+     where T.RNO between 5 and 6; -- 3페이지
+     
+     
+     -- 또는 
+     -- rownum을 사용하지 않고 row_number() 함수를 사용하여 페이징 처리를 해봅니다.
+     -- [ 틀린 SQL문] --   
+        select row_number() over(order by boardno desc)                                         
+             , boardno 
+             , subject 
+             , userid 
+             , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+        from tbl_board
+        where row_number() over(order by boardno desc) between 1 and 2;  
+        -- 오류!!! row_number() over(order by boardno desc) 은 where 절에 바로 쓸 수가 없다.!!!!
+        -- 그러므로 이것 또한 inline view 를 사용해야 한다.
+      select *
+      from tbl_board
+      -- [올바른 SQL문] --
+      --  1 페이지 ==>  row_number() : 1 ~ 2  /  boardno : 5 ~ 4
+        
+        select boardno, subject, userid, registerday 
+        from
+        (
+            select row_number() over(order by boardno desc) as RNO                                        
+                 , boardno 
+                 , subject 
+                 , userid 
+                 , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+            from tbl_board
+        ) V
+        where RNO between 1 and 2 -- 1페이지
+        
+        
+        
+      --  2 페이지 ==>  row_number() : 3 ~ 4  /  boardno : 3 ~ 2
+        select boardno, subject, userid, registerday 
+        from
+        (
+            select row_number() over(order by boardno desc) as RNO                                        
+                 , boardno 
+                 , subject 
+                 , userid 
+                 , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+            from tbl_board
+        ) V
+        where RNO between 3 and 4 -- 2페이지
+
+
+      --  3 페이지 ==>  row_number() : 5 ~ 6  /  boardno : 1
+              select boardno, subject, userid, registerday 
+        from
+        (
+            select row_number() over(order by boardno desc) as RNO                                        
+                 , boardno 
+                 , subject 
+                 , userid 
+                 , to_char(registerday, 'yyyy-mm-dd hh24:mi:ss') as registerday
+            from tbl_board
+        ) V
+        where RNO between 5 and 6 -- 3페이지
+        
+        
+   -------- **** 데이터 조작어(DML == Data Manuplation Language) **** ---------
+   --- DML 문은 기본적으로 수동 commit 이다.
+   --- 즉, DML 문을 수행한 다음에는 바로 디스크(파일)에 적용되지 않고 commit 해야만 적용된다.
+   --- 그래서 DML 문을 수행한 다음에 디스크(파일)에 적용치 않고자 한다라면 rollback 하면 된다.
+   
+   1. insert  --> 데이터 입력
+   2. update  --> 데이터 수정
+   3. delete  --> 데이터 삭제
+   4. merge   --> 데이터 병합 
+    
+   insert 는 문법이
+   insert into 테이블명(컬럼명1,컬럼명2,...) values(값1,값2,...); 
+   이다.
+   
+   ※ Unconditional insert all  -- ==> 조건이 없는 insert 
+    [문법] insert all 
+           into 테이블명1(컬럼명1, 컬럼명2, ....)
+           values(값1, 값2, .....)
+           into 테이블명2(컬럼명3, 컬럼명4, ....)
+           values(값3, 값4, .....)
+           SUB Query문;
+    
+    create table tbl_emp1
+       (empno            number(6)
+       ,ename            varchar2(50)
+       ,monthsal         number(7)
+       ,gender           varchar2(6)
+       ,manager_id       number(6)
+       ,department_id    number(4)
+       ,department_name  varchar2(30)
+       );       
+   -- Table TBL_EMP1이(가) 생성되었습니다.
+   
+   
+   create table tbl_emp1_backup
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(6)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   );  
+   -- Table TBL_EMP1_BACKUP이(가) 생성되었습니다.  
+   
+   select *
+   from tbl_emp1;
+   
+   select *
+   from tbl_emp1_backup;
+   
+   
+   insert all 
+   into tbl_emp1(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, month_sal, gender||'자', manager_id, department_id, department_name)
+   into tbl_emp1_backup(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, month_sal, gender||'자', manager_id, department_id, department_name)
+   select employee_id
+        , first_name || ' ' || last_name AS ename 
+        , nvl(salary + (salary * commission_pct), salary) AS month_sal
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS gender
+        , E.manager_id
+        , E.department_id
+        , department_name
+   from employees E LEFT JOIN departments D 
+   on E.department_id = D.department_id
+   order by E.department_id asc, employee_id asc;
+   
+   -- 214개 행 이(가) 삽입되었습니다.
+
+   
+   
+   
+   
+   
+   
+   ※ Conditional insert all -- ==> 조건이 있는 insert 
+   조건(where절)에 일치하는 행들만 특정 테이블로 찾아가서 insert 하도록 하는 것이다.
+      
+   create table tbl_emp_dept30
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(4)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   );
+
+   create table tbl_emp_dept50
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(4)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   );
+
+   create table tbl_emp_dept80
+   (empno            number(6)
+   ,ename            varchar2(50)
+   ,monthsal         number(7)
+   ,gender           varchar2(4)
+   ,manager_id       number(6)
+   ,department_id    number(4)
+   ,department_name  varchar2(30)
+   ); 
+   
+   insert all 
+   when department_id = 30 then 
+   into tbl_emp_dept30(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, month_sal, gender, manager_id, department_id, department_name)
+   when department_id = 50 then 
+   into tbl_emp_dept50(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, month_sal, gender, manager_id, department_id, department_name)
+   when department_id = 80 then 
+   into tbl_emp_dept80(empno, ename, monthsal, gender, manager_id, department_id, department_name)
+   values(employee_id, ename, month_sal, gender, manager_id, department_id, department_name)
+   
+   select employee_id
+        , first_name || ' ' || last_name AS ename 
+        , nvl(salary + (salary * commission_pct), salary) AS month_sal
+        , case when substr(jubun,7,1) in('1','3') then '남' else '여' end AS gender
+        , E.manager_id
+        , E.department_id
+        , department_name
+   from employees E LEFT JOIN departments D 
+   on E.department_id = D.department_id
+   where E.department_id in(30, 50, 80)
+   order by E.department_id asc, employee_id asc;
+   -- 85개 행 이(가) 삽입되었습니다.\
+   
+   commit;
+   
+   select *
+   from tbl_emp_dept30;
+   
+   select *
+   from tbl_emp_dept50;
+   
+   select *
+   from tbl_emp_dept80;
+   
+ 
+   -- [과제1 1번문제] --
+   select department_id as 부서번호
+        , first_name || ' ' || last_name as 사원명 
+        , substr(jubun,1,6)||'*******'  as 주민번호
+        , case when substr(jubun, 7,1) in(1,3) then '남' else '여' end  as 성별
+   from employees
+   where department_id in(30, 50);
+   
+   -- [과제1 2번문제] --
+   select *
+   from employees
+   
+   select first_name || ' ' || last_name as 사원명 
+        , phone_number as 공개연락처
+        , substr(phone_number, 1,4) || '***' || substr(phone_number, 8 ,5) as 비공개연락처
+   from employees
+   where department_id = 90;
+   
+    -- [과제1 2번문제] --
