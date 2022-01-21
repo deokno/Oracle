@@ -8460,6 +8460,245 @@ From REGIONS; -- 대륙정보를 알려주는 테이블
     -- where 절에 2개의 컬럼이 사용될 경우 각각 1개 컬럼마다 각각의 인덱스를 만들어서 사용하는 것보다
     -- 2개의 컬럼을 묶어서 하나의 인덱스로 만들어 사용하는 것이 속도가 좀 더 빠르다.
     
+    select *
+    from tbl_student_1
+    where name = '배수지10001' and address = '서울시 마포구 월드컵로 10001';
+    
+    -- !!!!  중요  !!!! --
+    -- 복합인덱스(composite index) 생성시 중요한 것은 선행컬럼을 정하는 것이다.
+    -- 선행컬럼은 맨처음에 나오는 것으로 아래에서는 name 이 선행컬럼이 된다.
+    -- 복합인덱스(composite index)로 사용되는 컬럼중 선행컬럼으로 선정되는 기준은 where 절에 가장 많이 사용되는 것이며 
+    -- 선택도(selectivity)가 높은 컬럼이 선행컬럼으로 선정되어야 한다.
+    
+    create index idx_tbl_student_1_name_addr
+    on tbl_student_1(name, address); -- name 컬럼이 선행컬럼이 된다. 
+    -- Index IDX_TBL_STUDENT_1_NAME_ADDR이(가) 생성되었습니다.
+    
+  /*
+    create index idx_tbl_student_1_name_addr
+    on tbl_student_1(address, name ); -- address 컬럼이 선행컬럼이 된다. 
+  */
+    
+    select A.index_name, uniqueness, column_name, descend
+         , B.column_position
+    from user_indexes A join user_ind_columns B
+    on A.index_name = B.index_name
+    where A.table_name = 'TBL_STUDENT_1';
+ /*
+    --------------------------------------------------------------------------------
+    index_name                  uniqueness  coiumn_name  descend   column_position
+    --------------------------------------------------------------------------------
+    IDX_TBL_STUDENT_1_NAME_ADDR	NONUNIQUE	NAME	     ASC	    1(숫자 1이 선행컬럼)
+    IDX_TBL_STUDENT_1_NAME_ADDR	NONUNIQUE	ADDRESS	     ASC	    2
+    --------------------------------------------------------------------------------
+ */
+    
+    select *
+    from tbl_student_1
+    where name = '배수지10001' and address = '서울시 마포구 월드컵로 10001';
+    -- where 절에 선행컬럼인 name 이 사용되어지면 복합인덱스(composite index)인 IDX_TBL_STUDENT_1_NAME_ADDR 을 사용하여 빨리 조회해온다.
+    
+    select *
+    from tbl_student_1
+    where address = '서울시 마포구 월드컵로 10001' and name = '배수지10001';
+    -- where 절에 선행컬럼인 name 이 사용되어지면 복합인덱스(composite index)인 IDX_TBL_STUDENT_1_NAME_ADDR 을 사용하여 빨리 조회해온다.
+    
+    select *
+    from tbl_student_1
+    where name = '배수지10001';
+    -- where 절에 선행컬럼인 name 이 사용되어지면 복합인덱스(composite index)인 IDX_TBL_STUDENT_1_NAME_ADDR 을 사용하여 빨리 조회해온다.
+    
+    select *
+    from tbl_student_1
+    where address = '서울시 마포구 월드컵로 10001';
+    -- where 절에 선행컬럼이 없으므로 복합인덱스(composite index)인 IDX_TBL_STUDENT_1_NAME_ADDR 을 사용하지 못하고 Table Full Scan 하여 조회해오므로 속도가 떨어진다.
+    
+    create table tbl_member
+    (userid      varchar2(20)
+    ,passwd      varchar2(30) not null
+    ,name        varchar2(20) not null 
+    ,address     varchar2(100)
+    ,email       varchar2(50) not null 
+    ,constraint  PK_tbl_member_userid primary key(userid)
+    ,constraint  UQ_tbl_member_email unique(email)
+    );
+    -- Table TBL_MEMBER이(가) 생성되었습니다.
+    
+    declare 
+         v_cnt  number := 1;  
+    begin
+         loop
+             exit when v_cnt > 10000;
+             
+             insert into tbl_member(userid, passwd, name, address, email)
+             values('hongkd'||v_cnt, 'qwer1234$', '홍길동'||v_cnt, '서울시 마포구 '||v_cnt, 'hongkd'||v_cnt||'@gmail.com');
+             
+             v_cnt := v_cnt + 1;
+         end loop;
+    end;
+    -- PL/SQL 프로시저가 성공적으로 완료되었습니다.
+    
+    commit;
+    -- 커밋 완료.
+    
+    select *
+    from tbl_member
+    
+    --- 로그인을 하는데 로그인이 성공되어지면 그 회원의 성명만을 보여주도록 한다.
+    
+    select name
+    from tbl_member
+    where userid = 'hongkd5001' and passwd = 'qwer1234$';
+    
+    --- **** userid, passwd, name 컬럼을 가지고 복합인덱스(composite index)를 생성해 봅니다. **** ---
+    
+    create index idx_tbl_member_id_pwd_name
+    on tbl_member(userid, passwd, name );
+    -- Index IDX_TBL_MEMBER_ID_PWD_NAME이(가) 생성되었습니다.
+    
+    select name
+    from tbl_member
+    where userid = 'hongkd5001' and passwd = 'qwer1234$';
+    -- where 절 및 select 에 복합인덱스(composite index)인 IDX_TBL_MEMBER_ID_PWD_NAME 에 사용되어진 컬럼만 있으므로
+    -- 테이블 tbl_member 에는 접근하지 않고 인덱스 IDX_TBL_MEMBER_ID_PWD_NAME 에만 접근해서 조회하므로 속도가 빨라진다.
+    
+    
+    select name, address
+    from tbl_member
+    where userod = 'hongkd5001' and passwd = 'qwer1234$';
+    
+    drop index idx_tbl_member_id_pwd_name;
+    -- Index IDX_TBL_MEMBER_ID_PWD_NAME이(가) 삭제되었습니다.
+    
+    
+    
+    
+    
+    
+    
+    ------ **** 함수기반 인덱스(function based index) 생성하기 **** -------
+    
+    drop index IDX_TBL_STUDENT_1_NAME_ADDR;
+    -- Index IDX_TBL_STUDENT_1_NAME_ADDR이(가) 삭제되었습니다.
+    
+    
+    select A.index_name, uniqueness, column_name, descend
+         , B.column_position
+    from user_indexes A join user_ind_columns B
+    on A.index_name = B.index_name
+    where A.table_name = 'TBL_STUDENT_1';
+    -- 생성되어진 index가 없습니다. 
+    
+    create index idx_tbl_student_1_name
+    on tbl_student_1(name);
+    -- Index IDX_TBL_STUDENT_1_NAME이(가) 생성되었습니다.
+    
+    select *
+    from TBL_STUDENT_1
+    where name = '배수지10003';
+    -- IDX_TBL_STUDENT_1_NAME 인덱스를 사용하여 조회해온다. 
+    
+    select *
+    from tbl_student_1
+    where substr(name, 2, 2) = '수지';
+    -- IDX_TBL_STUDENT_1_NAME 인덱스를 사용하지 않고, table Full Scan 하여 조회해온다.
+    
+    select *
+    from TBL_STUDENT_1
+    where name||'A' = '배수지10003A';
+    -- IDX_TBL_STUDENT_1_NAME 인덱스를 사용하지 않고, table Full Scan 하여 조회해온다.
+    
+    create index idx_func_student_1_name
+    on tbl_student_1( substr(name,2,2 ) );  -- 함수기반 인덱스(function based index)
+    -- Index IDX_FUNC_STUDENT_1_NAME이(가) 생성되었습니다.
+
+    create index idx_func_age_jubun
+    on employees(func_age(jubun));
+    /*
+      오류 보고 -
+      ORA-30553: The function is not deterministic
+      
+      func_age(jubun) 함수내에 sysdate 가 사용되어지므로 년도가 바뀌면 나이도 변경되어지므로 
+      인덱스로 만들수가 없다. 즉, 매번 값이 변동되어지는 sysdate는 인덱스로 생성이 불가하다. 
+    */
+    
+    select *
+    from tbl_student_1
+    where substr(name,2,2) = '수지';
+    -- 함수기반 인덱스인 Index IDX_FUNC_STUDENT_1_NAME 을 사용하여 조회해온다. 
+    
+    drop index IDX_FUNC_STUDENT_1_NAME;
+    -- Index IDX_FUNC_STUDENT_1_NAME이(가) 삭제되었습니다.
+    
+    select *
+    from TBL_STUDENT_1
+    where name = '배수지10003';
+    -- IDX_TBL_STUDENT_1_NAME 인덱스를 사용하여 조회해온다. 
+    
+    select *
+    from TBL_STUDENT_1
+    where name like '%배수지%';
+    -- 맨 앞에 % 또는 _ 가 나오면 IDX_TBL_STUDENT_1_NAME 인덱스를 사용하지 않고,
+    -- Table Full Scan 하여 조회해온다. 
+    
+    
+    --- **** 어떤 테이블의 어떤 컬럼에 Primary Key 제약 또는 Unique 제약을 주면
+    --       자동적으로 그 컬럼에는 unique 한 index가 생성되어진다.
+    --       인덱스명은 제약조건명이 된다. **** 
+    
+    create table tbl_student_2
+    (hakbun      varchar2(10) 
+    ,name        varchar2(20)
+    ,email       varchar2(20) not null
+    ,address     varchar2(20)
+    ,constraint PK_tbl_student_2_hakbun primary key(hakbun)
+    ,constraint UQ_tbl_student_2_email unique(email)
+    );
+    -- Table TBL_STUDENT_2이(가) 생성되었습니다.
+    
+    select A.index_name, uniqueness, column_name, descend 
+    from user_indexes A JOIN user_ind_columns B
+    ON A.index_name = B.index_name
+    where A.table_name = 'TBL_STUDENT_2';
+    
+    
+    -- Primary Key 제약 또는 Unique 제약으로 생성되어진 index 의 제거는 
+    -- drop index index명; 이 아니라
+    -- alter table 테이블명 drop constraint 제약조건명; 이다.
+    -- 제약조건을 삭제하면 자동적으로 index 도 삭제가 된다.
+
+    drop index PK_tbl_student_2_hakbun;
+/*
+    오류 보고 -
+    ORA-02429: cannot drop index used for enforcement of unique/primary key  
+    -- unique/primary key 가 사용되어지면 삭제할 수 없다.
+*/
+
+    alter table tbl_student_2
+    drop primary key;
+    -- Table TBL_STUDENT_2이(가) 변경되었습니다. / 제약조건을 삭제하면 자동적으로 인덱스가 삭제되어진다.
+    
+    alter table tbl_student_2
+    drop constraint UQ_tbl_student_2_email;
+    -- Table TBL_STUDENT_2이(가) 변경되었습니다.
+
+
+    select A.constraint_name, A.constraint_type, A.search_condition, 
+           B.column_name, B.position 
+    from user_constraints A join user_cons_columns B 
+    on A.constraint_name = B.constraint_name
+    where A.table_name = 'TBL_STUDENT_2';
+    -- 제약조건 검색
+    
+    select A.index_name, uniqueness, column_name, descend 
+    from user_indexes A JOIN user_ind_columns B
+    ON A.index_name = B.index_name
+    where A.table_name = 'TBL_STUDENT_2';
+    -- 인덱스 조회 
+    
+    
+    
+    
     
     
     
@@ -10766,45 +11005,7 @@ From REGIONS; -- 대륙정보를 알려주는 테이블
  
     
     ----------------------------------------------
-    
-    
-    
-    select department_id AS 부서번호
-         , department_name AS 부서명
-         , dept_adress AS 부서주소
-        -- , manager_name as 부서장성명
-         , employee_id AS 사원번호
-         , Ename AS 사원명
-         , gender  as 성별
-         , age as 나이
-         , year_sal as 연봉
-       -- , year_sal*taxpercent as 연봉소득세액
-       -- , year_sal - dept_avg_ys as 부서내연봉평균차액
-         , rank() over( partition by department_id
-                        order by year_sal desc )as 부서내연봉등수
-         , rank() over( order by year_sal desc )  as 전체연봉등수
-    from 
-    (     
-    select E.department_id 
-         , D.department_name 
-         , L.city || ' ' || L.street_address AS dept_adress
-         , E.employee_id 
-         , E.first_name || ' ' || E.last_name AS Ename
-         , case when substr(e.jubun, 7, 1) in(1,3) then '남' else '여' end  as gender
-         , extract(year from sysdate) - ( substr(jubun,1,2) + case when substr(jubun, 7, 1) in('1','2') then 1900 else 2000 end ) + 1 as age
-         , NVL(salary+(salary*commission_pct), salary)*12 as year_sal
-         , case when E.employee_id = D.manager_id then E.first_name || ' ' || E.last_name end as mg_name
-    from regions R
-    JOIN countries C
-    on R.region_id = C.region_id
-    JOIN LOCATIONS L
-    on C.country_id = L.country_id
-    JOIN DEPARTMENTS D
-    on L.location_id = D.location_id
-    right JOIN employees E
-    on D.department_id = E.department_id
-    ) V1
-    join
+   
     -- 부서내연봉평균
    /*    (
        select department_id , trunc(avg(NVL(salary+(salary*commission_pct), salary)*12)) as dept_avg_ys
@@ -10814,92 +11015,23 @@ From REGIONS; -- 대륙정보를 알려주는 테이블
        ) V2
      join*/
     -- 부서장성명구하기
-       ( 
+       
        select first_name || ' ' || last_name as manager_name
        from departments D JOIN employees E
        on D.manager_id = E.employee_id
        
-       ) V3 
+       
        
        ----------------------------
        join tbl_taxindex T 
        on year_sal between Lowerincome and highincome
        order by 1;
     
-    with
-    V1 as
-    (
-    select E.department_id 
-         , D.department_name 
-         , L.city || ' ' || L.street_address AS dept_adress
-         , E.employee_id 
-         , E.first_name || ' ' || E.last_name AS Ename
-         , case when substr(e.jubun, 7, 1) in(1,3) then '남' else '여' end  as gender
-         , extract(year from sysdate) - ( substr(jubun,1,2) + case when substr(jubun, 7, 1) in('1','2') then 1900 else 2000 end ) + 1 as age
-         , NVL(salary+(salary*commission_pct), salary)*12 as year_sal
-         , case when E.employee_id = D.manager_id then E.first_name || ' ' || E.last_name end as mg_name
-    from regions R
-    JOIN countries C
-    on R.region_id = C.region_id
-    JOIN LOCATIONS L
-    on C.country_id = L.country_id
-    JOIN DEPARTMENTS D
-    on L.location_id = D.location_id
-    right JOIN employees E
-    on D.department_id = E.department_id
-    join tbl_taxindex T 
-    on year_sal*12 between Lowerincome and highincome
-    )
-    ,
-    v2 as
-    (
-     select department_id
-         , trunc(avg(NVL(salary+(salary*commission_pct), salary)*12),0) as dept_avg_year_sal
-    from employees
-    group by department_id
-    )
-    select department_id AS 부서번호
-         , department_name AS 부서명
-         , dept_adress AS 부서주소
-       --, mg_name as 부서장성명
-         , employee_id AS 사원번호
-         , Ename AS 사원명
-         , gender  as 성별
-         , age as 나이
-         , year_sal as 연봉
-         , year_sal*taxpercent as 연봉소득세액
-         , year_sal - dept_avg_year_sal as 부서내연봉평균차액 
-    from v1 right JOIN v2 -- 여기를 수정 V2는 employees 테이블 이기 때문에 
-    on v1.department_id = v2.department_id
-    
-    order by 1;
-    
-    
-    select *
-    
-    
+
     -------------------------------------
     select first_name || ' ' || last_name
     from departments D JOIN employees E
        on D.manager_id = E.employee_id
-    
-    
-    select case when case when E.employee_id = D.manager_id and D.department_id = e.department_id then E.first_name || ' ' || E.last_name end as mg_name
-    from regions R
-    JOIN countries C
-    on R.region_id = C.region_id
-    JOIN LOCATIONS L
-    on C.country_id = L.country_id
-    JOIN DEPARTMENTS D
-    on L.location_id = D.location_id
-    right JOIN employees E
-    on D.department_id = E.department_id
-    join tbl_taxindex T 
-    on nvl(salary+(salary*commission_pct), salary)*12 between Lowerincome and highincome
-    order by 1;
-    
-    
-    
     
     select *
     from departments
@@ -10909,19 +11041,6 @@ From REGIONS; -- 대륙정보를 알려주는 테이블
     
     select *
     from LOCATIONS
-    
-    
-    
-    select D.department_id 
-    from employees E 
-    left join departments D
-    on E.department_id  = D.department_id
-    
-    
-    
-    
-    
-    
     
     select * 
     from tbl_taxindex;   
